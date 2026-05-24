@@ -148,7 +148,7 @@
   .item-card[draggable="true"]:active { cursor:grabbing; }
   .view-toggle-btn { width:32px; height:32px; border:1px solid var(--border); background:#fff; border-radius:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; color:var(--ink-muted); font-size:14px; }
   .view-toggle-btn.active { background:var(--ink); color:var(--cream); border-color:var(--ink); }
-  .view-toggle-btn + .sort-select { margin-left:auto; }
+  .view-toggles { display:flex; gap:4px; margin-left:8px; }
 
   /* ── Analytics page ── */
   #analytics-page { display:none; }
@@ -252,23 +252,6 @@
   body.dark .item-select-box { background:#211f1c; }
   .batch-mode-active .item-select-box { display:flex; }
   .item-card.batch-selected .item-select-box { background:var(--gold); border-color:var(--gold); color:#fff; }
-
-  /* ── Share & Export ── */
-  .share-modal-body { display:flex; flex-direction:column; gap:16px; }
-  .share-url-box { display:flex; gap:8px; align-items:center; }
-  .share-url-box input { flex:1; font-size:12px; background:var(--cream); border:1px solid var(--border); border-radius:1px; padding:10px 12px; color:var(--ink-muted); font-family:monospace; cursor:text; }
-  .share-url-box input:focus { border-color:var(--gold); outline:none; }
-  .btn-copy { padding:10px 16px; background:var(--ink); color:var(--cream); border:none; border-radius:1px; font-size:12px; cursor:pointer; white-space:nowrap; font-family:'Noto Sans TC',sans-serif; transition:background .2s; }
-  .btn-copy:hover { background:var(--ink-light); }
-  .share-note { font-size:11px; color:var(--ink-muted); line-height:1.6; }
-  .export-btns { display:flex; gap:10px; flex-wrap:wrap; }
-  .btn-export { flex:1; min-width:120px; padding:12px; border:1px solid var(--border); background:var(--warm-white); border-radius:1px; font-family:'Noto Sans TC',sans-serif; font-size:13px; cursor:pointer; color:var(--ink); transition:all .2s; text-align:center; }
-  .btn-export:hover { background:var(--ink); color:var(--cream); border-color:var(--ink); }
-  body.dark .btn-export { background:#211f1c; }
-  .action-bar { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; }
-  .btn-action { padding:8px 18px; border:1px solid var(--border); background:#fff; border-radius:50px; font-size:12px; color:var(--ink-muted); cursor:pointer; transition:all .2s; font-family:'Noto Sans TC',sans-serif; display:flex; align-items:center; gap:6px; }
-  body.dark .btn-action { background:#211f1c; }
-  .btn-action:hover { background:var(--ink); color:var(--cream); border-color:var(--ink); }
 
   /* ── Deadline badge ── */
   .deadline-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:2px 8px; border-radius:50px; letter-spacing:.05em; }
@@ -412,22 +395,18 @@
         <button class="filter-btn" onclick="setFilter('medium',this)">🟡 中優先</button>
         <button class="filter-btn" onclick="setFilter('low',this)">🟢 低優先</button>
         <button class="filter-btn" onclick="setFilter('done',this)">✓ 已購入</button>
-        <button class="view-toggle-btn active" id="btn-list-view" onclick="setView('list')" title="條列">☰</button>
-        <button class="view-toggle-btn" id="btn-grid-view" onclick="setView('grid')" title="格狀">⊞</button>
-        <button class="view-toggle-btn" id="btn-batch" onclick="toggleBatchMode()" title="批次選擇">☑</button>
         <select class="sort-select" onchange="setSort(this.value)">
           <option value="date">最新加入</option>
           <option value="price-desc">金額由高到低</option>
           <option value="price-asc">金額由低到高</option>
           <option value="priority">優先度</option>
         </select>
+        <div class="view-toggles">
+          <button class="view-toggle-btn active" id="btn-list-view" onclick="setView('list')" title="條列">☰</button>
+          <button class="view-toggle-btn" id="btn-grid-view" onclick="setView('grid')" title="格狀">⊞</button>
+          <button class="view-toggle-btn" id="btn-batch" onclick="toggleBatchMode()" title="批次選擇">☑</button>
+        </div>
       </div>
-      <!-- Action bar -->
-      <div class="action-bar">
-        <button class="btn-action" onclick="openShareModal()">🔗 分享清單</button>
-        <button class="btn-action" onclick="openExportModal()">📤 匯出</button>
-      </div>
-
       <div id="wishlist"></div>
     </div>
   </div>
@@ -555,40 +534,6 @@
 </div>
 <div class="toast" id="toast"></div>
 <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="深色模式">🌙</button>
-
-<!-- Share Modal -->
-<div class="modal-overlay" id="share-modal">
-  <div class="modal">
-    <div class="modal-title">分享清單</div>
-    <div class="share-modal-body">
-      <p style="font-size:13px;color:var(--ink-muted);">產生一個唯讀連結，任何人都能瀏覽你的清單，但無法編輯。</p>
-      <div class="share-url-box">
-        <input type="text" id="share-url-input" readonly placeholder="產生中…">
-        <button class="btn-copy" onclick="copyShareUrl()">複製</button>
-      </div>
-      <p class="share-note">⚠ 知道這個連結的人都能看到你的清單內容，請謹慎分享。</p>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeShareModal()">關閉</button>
-    </div>
-  </div>
-</div>
-
-<!-- Export Modal -->
-<div class="modal-overlay" id="export-modal">
-  <div class="modal">
-    <div class="modal-title">匯出清單</div>
-    <p style="font-size:13px;color:var(--ink-muted);margin-bottom:20px;">選擇匯出格式：</p>
-    <div class="export-btns">
-      <button class="btn-export" onclick="exportCSV()">📊 CSV<br><span style="font-size:11px;opacity:.6">Excel 可開啟</span></button>
-      <button class="btn-export" onclick="exportJSON()">📋 JSON<br><span style="font-size:11px;opacity:.6">備份用</span></button>
-      <button class="btn-export" onclick="exportText()">📝 純文字<br><span style="font-size:11px;opacity:.6">複製貼上</span></button>
-    </div>
-    <div class="modal-actions" style="margin-top:24px;">
-      <button class="btn-cancel" onclick="closeExportModal()">關閉</button>
-    </div>
-  </div>
-</div>
 
 <script>
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbw28K1Cs4DwISbSLEJ6-cOnt2UD2pqqUzgzJKMYXm_G1GtfLfbJ2II4Uhq8nDurflk/exec';
@@ -974,103 +919,6 @@
     setTimeout(()=>t.classList.remove('show'),2200);
   }
 
-  // ── Share ──
-  function openShareModal() {
-    const shareKey = 'readonly:' + passKey;
-    const baseUrl = window.location.href.split('?')[0];
-    const url = baseUrl + '?share=' + encodeURIComponent(shareKey);
-    document.getElementById('share-url-input').value = url;
-    // Push readonly copy to cloud
-    gasPost(shareKey, items).catch(()=>{});
-    document.getElementById('share-modal').classList.add('open');
-  }
-  function closeShareModal() { document.getElementById('share-modal').classList.remove('open'); }
-  function copyShareUrl() {
-    const input = document.getElementById('share-url-input');
-    input.select(); input.setSelectionRange(0,9999);
-    navigator.clipboard.writeText(input.value).then(()=>showToast('連結已複製 ✓')).catch(()=>{
-      document.execCommand('copy'); showToast('連結已複製 ✓');
-    });
-  }
-
-  // Handle share view on load
-  function checkShareMode() {
-    const params = new URLSearchParams(window.location.search);
-    const shareKey = params.get('share');
-    if (!shareKey) return false;
-    // readonly mode
-    gasGet(shareKey).then(data => {
-      items = data;
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app-screen').style.display = 'block';
-      document.getElementById('sync-status').textContent = '唯讀模式';
-      document.getElementById('sync-dot').style.background = 'var(--gold)';
-      document.querySelector('.form-card').style.display = 'none';
-      document.querySelector('.action-bar').style.display = 'none';
-      document.getElementById('btn-batch').style.display = 'none';
-      document.getElementById('btn-logout').textContent = '離開';
-      render(); updateSummary();
-    }).catch(()=>{
-      document.getElementById('login-error').textContent = '分享連結無效或已過期';
-    });
-    return true;
-  }
-
-  // ── Export ──
-  function openExportModal() { document.getElementById('export-modal').classList.add('open'); }
-  function closeExportModal() { document.getElementById('export-modal').classList.remove('open'); }
-
-  function exportCSV() {
-    const headers = ['名稱','金額','優先度','分類','截止日期','商品連結','備注','狀態'];
-    const rows = items.map(i => [
-      i.name, i.price,
-      priorityLabel[i.priority]||i.priority,
-      i.category, i.deadline||'', i.link||'', i.note||'',
-      i.done?'已購入':'未購入'
-    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
-    const csv = '﻿' + [headers.join(','), ...rows].join('
-');
-    downloadFile(csv, 'wishlist.csv', 'text/csv;charset=utf-8');
-    showToast('CSV 已下載 ✓');
-    closeExportModal();
-  }
-
-  function exportJSON() {
-    const json = JSON.stringify(items, null, 2);
-    downloadFile(json, 'wishlist.json', 'application/json');
-    showToast('JSON 已下載 ✓');
-    closeExportModal();
-  }
-
-  function exportText() {
-    const priorityEmoji = {high:'🔴',medium:'🟡',low:'🟢'};
-    const lines = ['✦ 欲購清單', '─'.repeat(30), ''];
-    items.forEach((item,i) => {
-      lines.push(`${i+1}. ${item.done?'[已購入] ':''}${item.name}`);
-      lines.push(`   ${priorityEmoji[item.priority]} ${priorityLabel[item.priority]}優先 ｜ ${item.category} ｜ ${item.price?'$'+item.price.toLocaleString():'未定價'}`);
-      if (item.deadline) lines.push(`   📅 截止：${item.deadline}`);
-      if (item.link) lines.push(`   🔗 ${item.link}`);
-      if (item.note) lines.push(`   備注：${item.note}`);
-      lines.push('');
-    });
-    lines.push(`合計 ${items.filter(i=>!i.done).length} 項未購入，總預算 $${items.filter(i=>!i.done).reduce((s,i)=>s+i.price,0).toLocaleString()}`);
-    navigator.clipboard.writeText(lines.join('
-')).then(()=>showToast('已複製到剪貼簿 ✓')).catch(()=>{
-      downloadFile(lines.join('
-'), 'wishlist.txt', 'text/plain');
-      showToast('文字檔已下載 ✓');
-    });
-    closeExportModal();
-  }
-
-  function downloadFile(content, filename, mimeType) {
-    const blob = new Blob([content], {type: mimeType});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-  }
-
   // ── Dark mode ──
   let darkMode = localStorage.getItem('darkMode') === '1';
   function applyDark() {
@@ -1079,7 +927,6 @@
   }
   function toggleDark() { darkMode=!darkMode; localStorage.setItem('darkMode', darkMode?'1':'0'); applyDark(); }
   applyDark();
-  if (!checkShareMode()) { /* normal login mode */ }
 
   // ── Batch select ──
   let batchMode = false;
@@ -1153,8 +1000,6 @@
   }
 
   document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
-  document.getElementById('share-modal').addEventListener('click',function(e){if(e.target===this)closeShareModal();});
-  document.getElementById('export-modal').addEventListener('click',function(e){if(e.target===this)closeExportModal();});
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape') { closeModal(); if(batchMode) exitBatch(); }
     if(e.key==='Enter'&&e.target.id==='inp-name') addItem();
