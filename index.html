@@ -286,19 +286,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── JSONBin config ──
-  const JSONBIN_API_KEY = '$2a$10$pmslvTF.eMnpbQlbqGkfeedhsKX9WIE0jC8FRCSVR5w2k7oGBJ0Bm';
-  const JSONBIN_BASE    = 'https://api.jsonbin.io/v3';
+  // ── Google Apps Script backend ──
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbw28K1Cs4DwISbSLEJ6-cOnt2UD2pqqUzgzJKMYXm_G1GtfLfbJ2II4Uhq8nDurflk/exec';
 
-  // Passphrase → bin ID mapping (stored in localStorage as index)
-  // Each passphrase gets its own bin on first login
-  function getBinMapKey() { return 'wishlist_binmap'; }
-  function getBinMap() {
-    try { return JSON.parse(localStorage.getItem(getBinMapKey()) || '{}'); } catch(e) { return {}; }
-  }
-  function setBinMap(map) { localStorage.setItem(getBinMapKey(), JSON.stringify(map)); }
-
-  let binId    = null;
   let items    = [];
   let passKey  = null;
   let currentFilter = 'all';
@@ -315,34 +305,23 @@
     document.getElementById('sync-status').textContent = msg;
   }
 
-  // ── JSONBin API helpers ──
-  async function apiFetch(path, method='GET', body=null) {
-    const opts = {
-      method,
-      headers: {
-        'X-Master-Key': JSONBIN_API_KEY,
-        'Content-Type': 'application/json',
-        'X-Bin-Versioning': 'false'
-      }
-    };
-    if (body !== null) opts.body = JSON.stringify(body);
-    const res = await fetch(JSONBIN_BASE + path, opts);
+  // ── GAS API helpers ──
+  async function gasGet(key) {
+    const url = GAS_URL + '?key=' + encodeURIComponent(key);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function gasPost(key, itemsData) {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ key, items: itemsData })
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
-  }
-
-  async function createBin(initialData) {
-    const res = await apiFetch('/b', 'POST', initialData);
-    return res.metadata.id;
-  }
-
-  async function readBin(id) {
-    const res = await apiFetch('/b/' + id + '/latest');
-    return res.record;
-  }
-
-  async function updateBin(id, data) {
-    await apiFetch('/b/' + id, 'PUT', data);
   }
 
   // ── Login ──
@@ -357,30 +336,16 @@
     document.getElementById('login-error').textContent = '';
 
     try {
-      const map = getBinMap();
-
-      if (map[passKey]) {
-        // Existing bin → load
-        binId = map[passKey];
-        const data = await readBin(binId);
-        items = Array.isArray(data.items) ? data.items : [];
-      } else {
-        // New passphrase → create bin
-        const initData = { passKey, items: [] };
-        binId = await createBin(initData);
-        map[passKey] = binId;
-        setBinMap(map);
-        items = [];
-      }
-
+      items = await gasGet(passKey);
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app-screen').style.display = 'block';
       setSyncStatus('ok', '已同步');
       render();
       updateSummary();
     } catch(e) {
-      document.getElementById('login-error').textContent = '連線失敗，請檢查網路後再試';
-      binId = null; passKey = null;
+      console.error('Login error:', e);
+      document.getElementById('login-error').textContent = '連線失敗，請稍後再試';
+      passKey = null;
     }
 
     btn.disabled = false;
@@ -388,7 +353,7 @@
   }
 
   function doLogout() {
-    binId = null; passKey = null; items = [];
+    passKey = null; items = [];
     document.getElementById('passphrase-input').value = '';
     document.getElementById('app-screen').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
@@ -396,10 +361,10 @@
 
   // ── Save to cloud (debounced) ──
   async function pushToCloud() {
-    if (!binId) return;
+    if (!passKey) return;
     setSyncStatus('syncing', '同步中…');
     try {
-      await updateBin(binId, { passKey, items });
+      await gasPost(passKey, items);
       setSyncStatus('ok', '已同步 ✓');
     } catch(e) {
       setSyncStatus('error', '同步失敗，請稍後再試');
