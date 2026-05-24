@@ -67,9 +67,15 @@
   .summary-divider { width:1px; background:var(--border); align-self:stretch; }
 
   /* ── Wishlist page ── */
-  .form-card { background:#fff; border:1px solid var(--border); border-radius:2px; padding:32px; margin-bottom:36px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+  .form-card { background:#fff; border:1px solid var(--border); border-radius:2px; margin-bottom:36px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
   .form-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold)); }
-  .form-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:400; margin-bottom:24px; letter-spacing:.05em; }
+  .form-header { display:flex; align-items:center; justify-content:space-between; padding:20px 28px; cursor:pointer; user-select:none; }
+  .form-header:hover .form-title { color:var(--gold); }
+  .form-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:400; letter-spacing:.05em; transition:color .2s; margin:0; }
+  .form-toggle { width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--ink-muted); transition:transform .3s; font-size:12px; }
+  .form-toggle.open { transform:rotate(180deg); }
+  .form-body { padding:0 28px 28px; }
+  .form-body.collapsed { display:none; }
   .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
   .form-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
   .field { display:flex; flex-direction:column; gap:8px; }
@@ -119,6 +125,30 @@
   .empty-icon { font-size:40px; margin-bottom:16px; opacity:.3; }
   .empty-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--ink-light); margin-bottom:8px; }
   .empty-sub { font-size:13px; }
+
+  /* ── Grid view ── */
+  #wishlist.grid-view { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+  #wishlist.grid-view .item-card { grid-template-columns:1fr; grid-template-rows:auto auto auto; padding:20px; gap:10px; overflow:hidden; min-width:0; }
+  #wishlist.grid-view .item-card::before { top:0; left:0; right:0; bottom:auto; width:auto; height:3px; border-radius:2px 2px 0 0; }
+  #wishlist.grid-view .item-check { display:none; }
+  #wishlist.grid-view .item-actions { flex-direction:row; opacity:1; justify-content:flex-end; flex-shrink:0; }
+  #wishlist.grid-view .item-price { font-size:24px; }
+  #wishlist.grid-view .item-body { order:1; min-width:0; overflow:hidden; }
+  #wishlist.grid-view .item-price-wrap { order:2; }
+  #wishlist.grid-view .item-actions { order:3; }
+  #wishlist.grid-view .item-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #wishlist.grid-view .item-note { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; word-break:break-all; }
+  #wishlist.grid-view .item-card .item-check-grid { width:20px; height:20px; border:1px solid var(--border); border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:10px; transition:all .2s; color:transparent; flex-shrink:0; }
+  #wishlist.grid-view .item-card.done .item-check-grid { background:var(--ink-muted); border-color:var(--ink-muted); color:#fff; }
+  #wishlist.grid-view .item-card .grid-top { display:flex; align-items:center; justify-content:space-between; }
+  #wishlist.grid-view .item-price-wrap { display:flex; align-items:center; justify-content:space-between; min-width:0; gap:8px; }
+  #wishlist.grid-view .item-price-wrap > div:first-child { min-width:0; overflow:hidden; }
+  .item-card.drag-over { border-color:var(--gold); border-style:dashed; }
+  .item-card[draggable="true"] { cursor:grab; }
+  .item-card[draggable="true"]:active { cursor:grabbing; }
+  .view-toggle-btn { width:32px; height:32px; border:1px solid var(--border); background:#fff; border-radius:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; color:var(--ink-muted); font-size:14px; }
+  .view-toggle-btn.active { background:var(--ink); color:var(--cream); border-color:var(--ink); }
+  .view-toggle-btn + .sort-select { margin-left:auto; }
 
   /* ── Analytics page ── */
   #analytics-page { display:none; }
@@ -189,6 +219,80 @@
   .toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--cream); padding:12px 24px; border-radius:1px; font-size:13px; opacity:0; transition:all .3s; z-index:200; pointer-events:none; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
+  /* ── Dark mode ── */
+  body.dark { --cream:#1a1917; --warm-white:#211f1c; --ink:#f0ede8; --ink-light:#c8c4be; --ink-muted:#7a7670; --gold:#c9a96e; --gold-light:#8a6e40; --border:#2e2b27; --shadow:0 2px 20px rgba(0,0,0,0.3); --shadow-hover:0 8px 40px rgba(0,0,0,0.4); }
+  body.dark input, body.dark select, body.dark textarea { background:#211f1c; color:#f0ede8; border-color:#2e2b27; }
+  body.dark input:focus, body.dark select:focus, body.dark textarea:focus { background:#2a2825; border-color:var(--gold); }
+  body.dark .item-card, body.dark .form-card, body.dark .modal, body.dark .ana-card, body.dark .login-box { background:#211f1c; }
+  body.dark .nav-tab, body.dark .filter-btn, body.dark .sort-select, body.dark .view-toggle-btn, body.dark .btn-icon, body.dark .budget-clear { background:#211f1c; color:var(--ink-muted); }
+  body.dark .nav-tab.active, body.dark .filter-btn.active, body.dark .view-toggle-btn.active { background:var(--gold); color:#1a1917; border-color:var(--gold); }
+  body.dark .priority-high { background:#3a1f1d; }
+  body.dark .priority-medium { background:#2e2510; }
+  body.dark .priority-low { background:#1a2820; }
+  body.dark .deadline-ok { background:#1a2820; }
+  body.dark .deadline-soon { background:#2e2510; }
+  body.dark .deadline-urgent, body.dark .deadline-overdue { background:#3a1f1d; }
+  .dark-toggle { position:fixed; bottom:24px; right:24px; width:44px; height:44px; border-radius:50%; border:1px solid var(--border); background:var(--warm-white); color:var(--ink-muted); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); transition:all .2s; z-index:50; }
+  .dark-toggle:hover { box-shadow:var(--shadow-hover); color:var(--gold); border-color:var(--gold); }
+
+  /* ── Batch select ── */
+  .batch-bar { display:none; align-items:center; gap:10px; background:var(--warm-white); border:1px solid var(--border); border-radius:2px; padding:10px 16px; margin-bottom:16px; font-size:13px; flex-wrap:wrap; }
+  .batch-bar.show { display:flex; }
+  .batch-count { color:var(--ink-muted); font-size:12px; flex:1; }
+  .batch-btn { padding:6px 16px; border:1px solid var(--border); background:#fff; border-radius:50px; font-size:12px; cursor:pointer; transition:all .2s; font-family:'Noto Sans TC',sans-serif; color:var(--ink-muted); }
+  body.dark .batch-btn { background:#211f1c; }
+  .batch-btn:hover { background:var(--ink); color:var(--cream); border-color:var(--ink); }
+  .batch-btn.danger:hover { background:var(--priority-high); border-color:var(--priority-high); color:#fff; }
+  .batch-btn.cancel:hover { border-color:var(--ink-muted); color:var(--ink); }
+  .item-card.batch-mode { cursor:pointer; }
+  .item-card.batch-mode:hover { border-color:var(--gold); }
+  .item-card.batch-selected { border-color:var(--gold); background:var(--gold-pale,#fdf8f0); }
+  body.dark .item-card.batch-selected { background:#2a2518; border-color:var(--gold); }
+  .item-select-box { width:18px; height:18px; border:1px solid var(--border); border-radius:3px; display:none; align-items:center; justify-content:center; flex-shrink:0; font-size:11px; transition:all .2s; color:transparent; background:#fff; cursor:pointer; }
+  body.dark .item-select-box { background:#211f1c; }
+  .batch-mode-active .item-select-box { display:flex; }
+  .item-card.batch-selected .item-select-box { background:var(--gold); border-color:var(--gold); color:#fff; }
+
+  /* ── Share & Export ── */
+  .share-modal-body { display:flex; flex-direction:column; gap:16px; }
+  .share-url-box { display:flex; gap:8px; align-items:center; }
+  .share-url-box input { flex:1; font-size:12px; background:var(--cream); border:1px solid var(--border); border-radius:1px; padding:10px 12px; color:var(--ink-muted); font-family:monospace; cursor:text; }
+  .share-url-box input:focus { border-color:var(--gold); outline:none; }
+  .btn-copy { padding:10px 16px; background:var(--ink); color:var(--cream); border:none; border-radius:1px; font-size:12px; cursor:pointer; white-space:nowrap; font-family:'Noto Sans TC',sans-serif; transition:background .2s; }
+  .btn-copy:hover { background:var(--ink-light); }
+  .share-note { font-size:11px; color:var(--ink-muted); line-height:1.6; }
+  .export-btns { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn-export { flex:1; min-width:120px; padding:12px; border:1px solid var(--border); background:var(--warm-white); border-radius:1px; font-family:'Noto Sans TC',sans-serif; font-size:13px; cursor:pointer; color:var(--ink); transition:all .2s; text-align:center; }
+  .btn-export:hover { background:var(--ink); color:var(--cream); border-color:var(--ink); }
+  body.dark .btn-export { background:#211f1c; }
+  .action-bar { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; }
+  .btn-action { padding:8px 18px; border:1px solid var(--border); background:#fff; border-radius:50px; font-size:12px; color:var(--ink-muted); cursor:pointer; transition:all .2s; font-family:'Noto Sans TC',sans-serif; display:flex; align-items:center; gap:6px; }
+  body.dark .btn-action { background:#211f1c; }
+  .btn-action:hover { background:var(--ink); color:var(--cream); border-color:var(--ink); }
+
+  /* ── Deadline badge ── */
+  .deadline-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:2px 8px; border-radius:50px; letter-spacing:.05em; }
+  .deadline-ok { background:#eef5f0; color:var(--priority-low); }
+  .deadline-soon { background:#fdf6ea; color:var(--priority-med); }
+  .deadline-urgent { background:#fdf0ef; color:var(--priority-high); animation:urgentPulse 2s infinite; }
+  .deadline-overdue { background:#f5e0de; color:var(--priority-high); font-weight:500; }
+  @keyframes urgentPulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+  .item-link { font-size:11px; color:var(--gold); text-decoration:none; display:inline-flex; align-items:center; gap:3px; margin-top:4px; transition:color .2s; word-break:break-all; }
+  .item-link:hover { color:var(--ink); }
+
+  /* ── Budget alert banner ── */
+  .budget-banner { display:none; align-items:center; gap:12px; background:#fdf0ef; border:1px solid #f0c4bf; border-radius:2px; padding:12px 20px; margin-bottom:20px; font-size:13px; color:var(--priority-high); }
+  .budget-banner.show { display:flex; }
+  .budget-banner-icon { font-size:18px; flex-shrink:0; }
+  .budget-banner strong { font-weight:500; }
+
+  /* ── Budget setting ── */
+  .budget-setting { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+  .budget-setting input { max-width:160px; }
+  .budget-setting label { white-space:nowrap; margin:0; font-size:11px; color:var(--ink-muted); letter-spacing:.1em; text-transform:uppercase; }
+  .budget-clear { padding:4px 10px; border:1px solid var(--border); background:transparent; border-radius:50px; font-size:11px; color:var(--ink-muted); cursor:pointer; font-family:'Noto Sans TC',sans-serif; transition:all .2s; white-space:nowrap; }
+  .budget-clear:hover { border-color:var(--priority-high); color:var(--priority-high); }
+
   @media (max-width:580px) {
     .form-grid,.form-row { grid-template-columns:1fr; }
     .item-card { grid-template-columns:auto 1fr auto; }
@@ -253,33 +357,52 @@
       </div>
 
       <div class="form-card">
-        <div class="form-title">＋ 新增項目</div>
-        <div class="form-grid">
-          <div class="field full"><label>商品名稱</label><input type="text" id="inp-name" placeholder="想要什麼？"></div>
+        <div class="form-header" onclick="toggleForm()">
+          <div class="form-title">＋ 新增項目</div>
+          <div class="form-toggle" id="form-toggle">▼</div>
         </div>
-        <div class="form-row">
-          <div class="field"><label>金額（元）</label><input type="number" id="inp-price" placeholder="0" min="0"></div>
-          <div class="field"><label>優先度</label>
-            <select id="inp-priority">
-              <option value="high">🔴 高</option>
-              <option value="medium" selected>🟡 中</option>
-              <option value="low">🟢 低</option>
-            </select>
+        <div class="form-body collapsed" id="form-body">
+          <div class="form-grid">
+            <div class="field full"><label>商品名稱</label><input type="text" id="inp-name" placeholder="想要什麼？"></div>
           </div>
-          <div class="field"><label>分類</label>
-            <select id="inp-category">
-              <option value="電子產品">電子產品</option><option value="服飾配件">服飾配件</option>
-              <option value="居家生活">居家生活</option><option value="書籍影音">書籍影音</option>
-              <option value="運動休閒">運動休閒</option><option value="旅遊體驗">旅遊體驗</option>
-              <option value="美食餐飲">美食餐飲</option><option value="家庭必需品">家庭必需品</option><option value="其他">其他</option>
-            </select>
+          <div class="form-row">
+            <div class="field"><label>金額（元）</label><input type="number" id="inp-price" placeholder="0" min="0"></div>
+            <div class="field"><label>優先度</label>
+              <select id="inp-priority">
+                <option value="high">🔴 高</option>
+                <option value="medium" selected>🟡 中</option>
+                <option value="low">🟢 低</option>
+              </select>
+            </div>
+            <div class="field"><label>分類</label>
+              <select id="inp-category">
+                <option value="電子產品">電子產品</option><option value="服飾配件">服飾配件</option>
+                <option value="居家生活">居家生活</option><option value="書籍影音">書籍影音</option>
+                <option value="運動休閒">運動休閒</option><option value="旅遊體驗">旅遊體驗</option>
+                <option value="美食餐飲">美食餐飲</option><option value="家庭必需品">家庭必需品</option><option value="其他">其他</option>
+              </select>
+            </div>
           </div>
+          <div class="field" style="margin-bottom:20px">
+            <label>備注 <span style="opacity:.5">（選填）</span></label>
+            <textarea id="inp-note" placeholder="連結、尺寸、顏色…"></textarea>
+          </div>
+          <button class="btn-add" onclick="addItem()">加入清單</button>
         </div>
-        <div class="field" style="margin-bottom:20px">
-          <label>備注 <span style="opacity:.5">（選填）</span></label>
-          <textarea id="inp-note" placeholder="連結、尺寸、顏色…"></textarea>
-        </div>
-        <button class="btn-add" onclick="addItem()">加入清單</button>
+      </div>
+
+      <!-- Budget alert -->
+      <div class="budget-banner" id="budget-banner">
+        <span class="budget-banner-icon">⚠</span>
+        <span id="budget-banner-text"></span>
+      </div>
+
+      <!-- Batch bar -->
+      <div class="batch-bar" id="batch-bar">
+        <span class="batch-count" id="batch-count">已選 0 項</span>
+        <button class="batch-btn" onclick="batchDone()">✓ 標記已購入</button>
+        <button class="batch-btn danger" onclick="batchDelete()">✕ 刪除</button>
+        <button class="batch-btn cancel" onclick="exitBatch()">取消</button>
       </div>
 
       <div class="filter-bar">
@@ -289,6 +412,9 @@
         <button class="filter-btn" onclick="setFilter('medium',this)">🟡 中優先</button>
         <button class="filter-btn" onclick="setFilter('low',this)">🟢 低優先</button>
         <button class="filter-btn" onclick="setFilter('done',this)">✓ 已購入</button>
+        <button class="view-toggle-btn active" id="btn-list-view" onclick="setView('list')" title="條列">☰</button>
+        <button class="view-toggle-btn" id="btn-grid-view" onclick="setView('grid')" title="格狀">⊞</button>
+        <button class="view-toggle-btn" id="btn-batch" onclick="toggleBatchMode()" title="批次選擇">☑</button>
         <select class="sort-select" onchange="setSort(this.value)">
           <option value="date">最新加入</option>
           <option value="price-desc">金額由高到低</option>
@@ -296,6 +422,12 @@
           <option value="priority">優先度</option>
         </select>
       </div>
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button class="btn-action" onclick="openShareModal()">🔗 分享清單</button>
+        <button class="btn-action" onclick="openExportModal()">📤 匯出</button>
+      </div>
+
       <div id="wishlist"></div>
     </div>
   </div>
@@ -404,6 +536,16 @@
         </select>
       </div>
     </div>
+    <div class="form-row" style="margin-bottom:16px">
+      <div class="field">
+        <label>截止日期</label>
+        <input type="date" id="edit-deadline">
+      </div>
+      <div class="field full" style="grid-column:span 2">
+        <label>商品連結</label>
+        <input type="url" id="edit-link" placeholder="https://…">
+      </div>
+    </div>
     <div class="field"><label>備注</label><textarea id="edit-note"></textarea></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
@@ -412,6 +554,41 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="深色模式">🌙</button>
+
+<!-- Share Modal -->
+<div class="modal-overlay" id="share-modal">
+  <div class="modal">
+    <div class="modal-title">分享清單</div>
+    <div class="share-modal-body">
+      <p style="font-size:13px;color:var(--ink-muted);">產生一個唯讀連結，任何人都能瀏覽你的清單，但無法編輯。</p>
+      <div class="share-url-box">
+        <input type="text" id="share-url-input" readonly placeholder="產生中…">
+        <button class="btn-copy" onclick="copyShareUrl()">複製</button>
+      </div>
+      <p class="share-note">⚠ 知道這個連結的人都能看到你的清單內容，請謹慎分享。</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeShareModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal">
+    <div class="modal-title">匯出清單</div>
+    <p style="font-size:13px;color:var(--ink-muted);margin-bottom:20px;">選擇匯出格式：</p>
+    <div class="export-btns">
+      <button class="btn-export" onclick="exportCSV()">📊 CSV<br><span style="font-size:11px;opacity:.6">Excel 可開啟</span></button>
+      <button class="btn-export" onclick="exportJSON()">📋 JSON<br><span style="font-size:11px;opacity:.6">備份用</span></button>
+      <button class="btn-export" onclick="exportText()">📝 純文字<br><span style="font-size:11px;opacity:.6">複製貼上</span></button>
+    </div>
+    <div class="modal-actions" style="margin-top:24px;">
+      <button class="btn-cancel" onclick="closeExportModal()">關閉</button>
+    </div>
+  </div>
+</div>
 
 <script>
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbw28K1Cs4DwISbSLEJ6-cOnt2UD2pqqUzgzJKMYXm_G1GtfLfbJ2II4Uhq8nDurflk/exec';
@@ -461,7 +638,7 @@
       items = await gasGet(passKey);
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app-screen').style.display='block';
-      setSyncStatus('ok','已同步'); render(); updateSummary();
+      setSyncStatus('ok','已同步'); render(); updateSummary(); initBudgetInput(); checkBudgetAlert();
     } catch(e) {
       document.getElementById('login-error').textContent='連線失敗，請稍後再試';
       passKey=null;
@@ -483,7 +660,7 @@
     catch(e) { setSyncStatus('error','同步失敗，請稍後再試'); }
   }
   function scheduleSave() { clearTimeout(syncTimer); syncTimer=setTimeout(pushToCloud,900); }
-  function save() { scheduleSave(); render(); updateSummary(); }
+  function save() { scheduleSave(); render(); updateSummary(); checkBudgetAlert(); }
 
   // ── CRUD ──
   function addItem() {
@@ -492,11 +669,15 @@
     const priority=document.getElementById('inp-priority').value;
     const category=document.getElementById('inp-category').value;
     const note=document.getElementById('inp-note').value.trim();
+    const deadline=document.getElementById('inp-deadline').value;
+    const link=document.getElementById('inp-link').value.trim();
     if (!name) { showToast('請輸入商品名稱'); return; }
-    items.unshift({id:Date.now(),name,price,priority,category,note,done:false});
+    items.unshift({id:Date.now(),name,price,priority,category,note,deadline,link,done:false});
     document.getElementById('inp-name').value='';
     document.getElementById('inp-price').value='';
     document.getElementById('inp-note').value='';
+    document.getElementById('inp-deadline').value='';
+    document.getElementById('inp-link').value='';
     document.getElementById('inp-priority').value='medium';
     save(); showToast('已加入清單 ✓');
   }
@@ -509,7 +690,9 @@
     document.getElementById('edit-price').value=item.price;
     document.getElementById('edit-priority').value=item.priority;
     document.getElementById('edit-category').value=item.category;
-    document.getElementById('edit-note').value=item.note;
+    document.getElementById('edit-note').value=item.note||'';
+    document.getElementById('edit-deadline').value=item.deadline||'';
+    document.getElementById('edit-link').value=item.link||'';
     document.getElementById('modal').classList.add('open');
   }
   function closeModal() { document.getElementById('modal').classList.remove('open'); }
@@ -521,6 +704,8 @@
     item.priority=document.getElementById('edit-priority').value;
     item.category=document.getElementById('edit-category').value;
     item.note=document.getElementById('edit-note').value.trim();
+    item.deadline=document.getElementById('edit-deadline').value;
+    item.link=document.getElementById('edit-link').value.trim();
     closeModal(); save(); showToast('已儲存更新 ✓');
   }
 
@@ -549,26 +734,61 @@
       container.innerHTML=`<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">清單是空的</div><p class="empty-sub">加入你第一個心願吧</p></div>`;
       return;
     }
-    container.innerHTML=list.map(item=>`
-      <div class="item-card ${item.done?'done':''}" data-priority="${item.priority}">
-        <div class="item-check" onclick="toggleDone(${item.id})">${item.done?'✓':''}</div>
-        <div class="item-body">
-          <div class="item-name">${escHtml(item.name)}</div>
-          <div class="item-meta">
-            <span class="item-category">${escHtml(item.category)}</span>
+    if (currentView === 'grid') {
+      container.innerHTML = list.map(item=>`
+        <div class="item-card ${item.done?'done':''}" data-priority="${item.priority}">
+          <div class="grid-top">
+            <div class="item-check-grid" onclick="toggleDone(${item.id})">${item.done?'✓':''}</div>
             <span class="priority-tag priority-${item.priority}">${priorityLabel[item.priority]}</span>
           </div>
-          ${item.note?`<div class="item-note">${escHtml(item.note)}</div>`:''}
-        </div>
-        <div>
-          <div class="item-price">${formatPrice(item.price)}</div>
-          ${item.price?'<div class="item-price-label">預算</div>':''}
-        </div>
-        <div class="item-actions">
-          <button class="btn-icon edit" onclick="openEdit(${item.id})" title="編輯">✎</button>
-          <button class="btn-icon" onclick="deleteItem(${item.id})" title="刪除">✕</button>
-        </div>
-      </div>`).join('');
+          <div class="item-body">
+            <div class="item-name">${escHtml(item.name)}</div>
+            <div class="item-meta"><span class="item-category">${escHtml(item.category)}</span></div>
+            ${item.deadline&&!item.done?`<div style="margin-top:4px">${deadlineBadge(item.deadline)}</div>`:''}
+            ${item.link?`<a class="item-link" href="${escHtml(item.link)}" target="_blank" rel="noopener">🔗 連結</a>`:''}
+            ${item.note?`<div class="item-note">${escHtml(item.note)}</div>`:''}
+          </div>
+          <div class="item-price-wrap">
+            <div>
+              <div class="item-price">${formatPrice(item.price)}</div>
+              ${item.price?'<div class="item-price-label">預算</div>':''}
+            </div>
+            <div class="item-actions" style="opacity:1;flex-direction:row;">
+              <button class="btn-icon edit" onclick="openEdit(${item.id})" title="編輯">✎</button>
+              <button class="btn-icon" onclick="deleteItem(${item.id})" title="刪除">✕</button>
+            </div>
+          </div>
+        </div>`).join('');
+    } else {
+      container.innerHTML=list.map(item=>`
+        <div class="item-card ${item.done?'done':''} ${batchMode?'batch-mode':''} ${selectedIds.has(item.id)?'batch-selected':''}"
+          data-priority="${item.priority}" data-id="${item.id}"
+          draggable="${batchMode?'false':'true'}"
+          ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd(event)"
+          ondragover="onDragOver(event,${item.id})" ondrop="onDrop(event,${item.id})"
+          onclick="${batchMode?`toggleSelect(${item.id})`:''}">
+          <div class="item-select-box">${selectedIds.has(item.id)?'✓':''}</div>
+          <div class="item-check" onclick="event.stopPropagation();toggleDone(${item.id})">${item.done?'✓':''}</div>
+          <div class="item-body">
+            <div class="item-name">${escHtml(item.name)}</div>
+            <div class="item-meta">
+              <span class="item-category">${escHtml(item.category)}</span>
+              <span class="priority-tag priority-${item.priority}">${priorityLabel[item.priority]}</span>
+              ${item.deadline&&!item.done?deadlineBadge(item.deadline):''}
+            </div>
+            ${item.link?`<a class="item-link" href="${escHtml(item.link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 前往商品頁面</a>`:''}
+            ${item.note?`<div class="item-note">${escHtml(item.note)}</div>`:''}
+          </div>
+          <div>
+            <div class="item-price">${formatPrice(item.price)}</div>
+            ${item.price?'<div class="item-price-label">預算</div>':''}
+          </div>
+          <div class="item-actions">
+            <button class="btn-icon edit" onclick="event.stopPropagation();openEdit(${item.id})" title="編輯">✎</button>
+            <button class="btn-icon" onclick="event.stopPropagation();deleteItem(${item.id})" title="刪除">✕</button>
+          </div>
+        </div>`).join('');
+    }
   }
 
   function updateSummary() {
@@ -681,6 +901,72 @@
       </div>`).join('');
   }
 
+  // ── Budget limit ──
+  let budgetLimit = parseFloat(localStorage.getItem('budgetLimit')) || 0;
+  function initBudgetInput() {
+    if (budgetLimit > 0) document.getElementById('inp-budget-limit').value = budgetLimit;
+  }
+  function updateBudgetLimit() {
+    const v = parseFloat(document.getElementById('inp-budget-limit').value) || 0;
+    budgetLimit = v;
+    if (v > 0) localStorage.setItem('budgetLimit', v);
+    else localStorage.removeItem('budgetLimit');
+    checkBudgetAlert();
+  }
+  function clearBudgetLimit() {
+    budgetLimit = 0;
+    document.getElementById('inp-budget-limit').value = '';
+    localStorage.removeItem('budgetLimit');
+    checkBudgetAlert();
+  }
+  function checkBudgetAlert() {
+    if (!budgetLimit) { document.getElementById('budget-banner').classList.remove('show'); return; }
+    const total = items.filter(i=>!i.done).reduce((s,i)=>s+i.price,0);
+    const banner = document.getElementById('budget-banner');
+    const text = document.getElementById('budget-banner-text');
+    if (total > budgetLimit) {
+      text.innerHTML = `總預算已超出上限！目前 <strong>$${total.toLocaleString()}</strong>，上限 <strong>$${budgetLimit.toLocaleString()}</strong>，超出 <strong>$${(total-budgetLimit).toLocaleString()}</strong>`;
+      banner.classList.add('show');
+    } else if (total > budgetLimit * 0.9) {
+      text.innerHTML = `預算接近上限！目前 <strong>$${total.toLocaleString()}</strong>，上限 <strong>$${budgetLimit.toLocaleString()}</strong>（已用 ${Math.round(total/budgetLimit*100)}%）`;
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  // ── Deadline helpers ──
+  function deadlineBadge(deadline) {
+    if (!deadline) return '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(deadline); d.setHours(0,0,0,0);
+    const diff = Math.round((d-today)/(1000*60*60*24));
+    if (diff < 0) return `<span class="deadline-badge deadline-overdue">⚠ 已逾期 ${Math.abs(diff)} 天</span>`;
+    if (diff === 0) return `<span class="deadline-badge deadline-urgent">⏰ 今天到期</span>`;
+    if (diff <= 7) return `<span class="deadline-badge deadline-urgent">⏰ ${diff} 天後到期</span>`;
+    if (diff <= 30) return `<span class="deadline-badge deadline-soon">📅 ${diff} 天後</span>`;
+    return `<span class="deadline-badge deadline-ok">📅 ${d.toLocaleDateString('zh-TW')}</span>`;
+  }
+
+  // ── Form toggle ──
+  function toggleForm() {
+    const body = document.getElementById('form-body');
+    const toggle = document.getElementById('form-toggle');
+    const collapsed = body.classList.toggle('collapsed');
+    toggle.classList.toggle('open', !collapsed);
+  }
+
+  // ── View toggle ──
+  let currentView = 'list';
+  function setView(v) {
+    currentView = v;
+    const wl = document.getElementById('wishlist');
+    wl.classList.toggle('grid-view', v==='grid');
+    document.getElementById('btn-list-view').classList.toggle('active', v==='list');
+    document.getElementById('btn-grid-view').classList.toggle('active', v==='grid');
+    render();
+  }
+
   function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function showToast(msg) {
     const t=document.getElementById('toast');
@@ -688,9 +974,189 @@
     setTimeout(()=>t.classList.remove('show'),2200);
   }
 
+  // ── Share ──
+  function openShareModal() {
+    const shareKey = 'readonly:' + passKey;
+    const baseUrl = window.location.href.split('?')[0];
+    const url = baseUrl + '?share=' + encodeURIComponent(shareKey);
+    document.getElementById('share-url-input').value = url;
+    // Push readonly copy to cloud
+    gasPost(shareKey, items).catch(()=>{});
+    document.getElementById('share-modal').classList.add('open');
+  }
+  function closeShareModal() { document.getElementById('share-modal').classList.remove('open'); }
+  function copyShareUrl() {
+    const input = document.getElementById('share-url-input');
+    input.select(); input.setSelectionRange(0,9999);
+    navigator.clipboard.writeText(input.value).then(()=>showToast('連結已複製 ✓')).catch(()=>{
+      document.execCommand('copy'); showToast('連結已複製 ✓');
+    });
+  }
+
+  // Handle share view on load
+  function checkShareMode() {
+    const params = new URLSearchParams(window.location.search);
+    const shareKey = params.get('share');
+    if (!shareKey) return false;
+    // readonly mode
+    gasGet(shareKey).then(data => {
+      items = data;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'block';
+      document.getElementById('sync-status').textContent = '唯讀模式';
+      document.getElementById('sync-dot').style.background = 'var(--gold)';
+      document.querySelector('.form-card').style.display = 'none';
+      document.querySelector('.action-bar').style.display = 'none';
+      document.getElementById('btn-batch').style.display = 'none';
+      document.getElementById('btn-logout').textContent = '離開';
+      render(); updateSummary();
+    }).catch(()=>{
+      document.getElementById('login-error').textContent = '分享連結無效或已過期';
+    });
+    return true;
+  }
+
+  // ── Export ──
+  function openExportModal() { document.getElementById('export-modal').classList.add('open'); }
+  function closeExportModal() { document.getElementById('export-modal').classList.remove('open'); }
+
+  function exportCSV() {
+    const headers = ['名稱','金額','優先度','分類','截止日期','商品連結','備注','狀態'];
+    const rows = items.map(i => [
+      i.name, i.price,
+      priorityLabel[i.priority]||i.priority,
+      i.category, i.deadline||'', i.link||'', i.note||'',
+      i.done?'已購入':'未購入'
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+    const csv = '﻿' + [headers.join(','), ...rows].join('
+');
+    downloadFile(csv, 'wishlist.csv', 'text/csv;charset=utf-8');
+    showToast('CSV 已下載 ✓');
+    closeExportModal();
+  }
+
+  function exportJSON() {
+    const json = JSON.stringify(items, null, 2);
+    downloadFile(json, 'wishlist.json', 'application/json');
+    showToast('JSON 已下載 ✓');
+    closeExportModal();
+  }
+
+  function exportText() {
+    const priorityEmoji = {high:'🔴',medium:'🟡',low:'🟢'};
+    const lines = ['✦ 欲購清單', '─'.repeat(30), ''];
+    items.forEach((item,i) => {
+      lines.push(`${i+1}. ${item.done?'[已購入] ':''}${item.name}`);
+      lines.push(`   ${priorityEmoji[item.priority]} ${priorityLabel[item.priority]}優先 ｜ ${item.category} ｜ ${item.price?'$'+item.price.toLocaleString():'未定價'}`);
+      if (item.deadline) lines.push(`   📅 截止：${item.deadline}`);
+      if (item.link) lines.push(`   🔗 ${item.link}`);
+      if (item.note) lines.push(`   備注：${item.note}`);
+      lines.push('');
+    });
+    lines.push(`合計 ${items.filter(i=>!i.done).length} 項未購入，總預算 $${items.filter(i=>!i.done).reduce((s,i)=>s+i.price,0).toLocaleString()}`);
+    navigator.clipboard.writeText(lines.join('
+')).then(()=>showToast('已複製到剪貼簿 ✓')).catch(()=>{
+      downloadFile(lines.join('
+'), 'wishlist.txt', 'text/plain');
+      showToast('文字檔已下載 ✓');
+    });
+    closeExportModal();
+  }
+
+  function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], {type: mimeType});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Dark mode ──
+  let darkMode = localStorage.getItem('darkMode') === '1';
+  function applyDark() {
+    document.body.classList.toggle('dark', darkMode);
+    document.getElementById('dark-toggle').textContent = darkMode ? '☀️' : '🌙';
+  }
+  function toggleDark() { darkMode=!darkMode; localStorage.setItem('darkMode', darkMode?'1':'0'); applyDark(); }
+  applyDark();
+  if (!checkShareMode()) { /* normal login mode */ }
+
+  // ── Batch select ──
+  let batchMode = false;
+  let selectedIds = new Set();
+
+  function toggleBatchMode() {
+    batchMode = !batchMode;
+    selectedIds.clear();
+    document.getElementById('btn-batch').classList.toggle('active', batchMode);
+    document.getElementById('batch-bar').classList.toggle('show', batchMode);
+    document.getElementById('wishlist').classList.toggle('batch-mode-active', batchMode);
+    updateBatchCount();
+    render();
+  }
+
+  function exitBatch() {
+    batchMode = false; selectedIds.clear();
+    document.getElementById('btn-batch').classList.remove('active');
+    document.getElementById('batch-bar').classList.remove('show');
+    document.getElementById('wishlist').classList.remove('batch-mode-active');
+    render();
+  }
+
+  function toggleSelect(id) {
+    if (!batchMode) return;
+    if (selectedIds.has(id)) selectedIds.delete(id);
+    else selectedIds.add(id);
+    updateBatchCount();
+    // update card UI without full re-render
+    document.querySelectorAll('.item-card').forEach(card => {
+      const cardId = parseInt(card.dataset.id);
+      card.classList.toggle('batch-selected', selectedIds.has(cardId));
+      const box = card.querySelector('.item-select-box');
+      if (box) box.textContent = selectedIds.has(cardId) ? '✓' : '';
+    });
+  }
+
+  function updateBatchCount() {
+    document.getElementById('batch-count').textContent = `已選 ${selectedIds.size} 項`;
+  }
+
+  function batchDone() {
+    if (!selectedIds.size) { showToast('請先選擇項目'); return; }
+    selectedIds.forEach(id => { const i=items.find(x=>x.id===id); if(i) i.done=true; });
+    showToast(`已標記 ${selectedIds.size} 項為已購入`);
+    exitBatch(); save();
+  }
+
+  function batchDelete() {
+    if (!selectedIds.size) { showToast('請先選擇項目'); return; }
+    const count = selectedIds.size;
+    items = items.filter(i => !selectedIds.has(i.id));
+    showToast(`已刪除 ${count} 項`);
+    exitBatch(); save();
+  }
+
+  // ── Drag to reorder ──
+  let dragSrcId = null;
+  function onDragStart(e, id) { dragSrcId = id; e.dataTransfer.effectAllowed='move'; e.currentTarget.style.opacity='.4'; }
+  function onDragEnd(e) { e.currentTarget.style.opacity=''; document.querySelectorAll('.item-card').forEach(c=>c.classList.remove('drag-over')); }
+  function onDragOver(e, id) { e.preventDefault(); if (id===dragSrcId) return; document.querySelectorAll('.item-card').forEach(c=>c.classList.remove('drag-over')); e.currentTarget.classList.add('drag-over'); }
+  function onDrop(e, id) {
+    e.preventDefault();
+    if (id===dragSrcId) return;
+    const fromIdx = items.findIndex(i=>i.id===dragSrcId);
+    const toIdx   = items.findIndex(i=>i.id===id);
+    if (fromIdx===-1||toIdx===-1) return;
+    const [moved] = items.splice(fromIdx,1);
+    items.splice(toIdx,0,moved);
+    save();
+  }
+
   document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+  document.getElementById('share-modal').addEventListener('click',function(e){if(e.target===this)closeShareModal();});
+  document.getElementById('export-modal').addEventListener('click',function(e){if(e.target===this)closeExportModal();});
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape') closeModal();
+    if(e.key==='Escape') { closeModal(); if(batchMode) exitBatch(); }
     if(e.key==='Enter'&&e.target.id==='inp-name') addItem();
     if(e.key==='Enter'&&e.target.id==='passphrase-input') doLogin();
   });
