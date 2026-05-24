@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>欲購清單</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf8f4;
+    --warm-white: #f5f2ec;
+    --ink: #1c1a17;
+    --ink-light: #4a4640;
+    --ink-muted: #8a8480;
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --border: #e2ddd6;
+    --priority-high: #c0534a;
+    --priority-med: #c9a96e;
+    --priority-low: #6a9e7a;
+    --shadow: 0 2px 20px rgba(28,26,23,0.07);
+    --shadow-hover: 0 8px 40px rgba(28,26,23,0.13);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); font-family: 'Noto Sans TC', sans-serif; color: var(--ink); min-height: 100vh; font-weight: 300; }
+  .top-bar { height: 3px; background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent); }
+
+  /* Login */
+  #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+  .login-box { background: #fff; border: 1px solid var(--border); border-radius: 2px; padding: 48px 40px; max-width: 380px; width: 100%; box-shadow: var(--shadow); position: relative; overflow: hidden; text-align: center; }
+  .login-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold)); }
+  .login-icon { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--gold); margin-bottom: 8px; }
+  .login-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--ink); margin-bottom: 6px; }
+  .login-sub { font-size: 12px; color: var(--ink-muted); margin-bottom: 32px; letter-spacing: 0.05em; }
+  .login-field { margin-bottom: 16px; }
+  .login-field input { width: 100%; background: var(--cream); border: 1px solid var(--border); border-radius: 1px; padding: 13px 16px; font-family: 'Noto Sans TC', sans-serif; font-size: 15px; font-weight: 300; color: var(--ink); outline: none; text-align: center; letter-spacing: 0.15em; transition: border-color 0.2s, background 0.2s; }
+  .login-field input:focus { border-color: var(--gold); background: #fff; }
+  .btn-login { width: 100%; padding: 13px; background: var(--ink); color: var(--cream); border: none; border-radius: 1px; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; letter-spacing: 0.2em; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+  .btn-login:hover { background: var(--ink-light); }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-error { font-size: 12px; color: var(--priority-high); margin-top: 10px; min-height: 18px; }
+
+  /* App */
+  #app-screen { display: none; }
+  header { text-align: center; padding: 56px 24px 40px; }
+  .header-label { font-family: 'Cormorant Garamond', serif; font-size: 11px; letter-spacing: 0.4em; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+  h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(38px, 6vw, 58px); font-weight: 300; color: var(--ink); letter-spacing: 0.05em; line-height: 1; margin-bottom: 16px; }
+  .header-sub { font-size: 13px; color: var(--ink-muted); letter-spacing: 0.05em; }
+  .divider { display: flex; align-items: center; gap: 16px; max-width: 180px; margin: 24px auto 0; }
+  .divider-line { flex: 1; height: 1px; background: var(--gold-light); }
+  .divider-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+
+  .sync-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; font-size: 11px; color: var(--ink-muted); letter-spacing: 0.05em; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--priority-low); flex-shrink: 0; }
+  .sync-dot.syncing { background: var(--gold); animation: pulse 1s infinite; }
+  .sync-dot.error { background: var(--priority-high); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .btn-logout { margin-left: 12px; padding: 3px 10px; border: 1px solid var(--border); background: transparent; border-radius: 50px; font-size: 11px; color: var(--ink-muted); cursor: pointer; transition: all 0.2s; font-family: 'Noto Sans TC', sans-serif; }
+  .btn-logout:hover { border-color: var(--ink-muted); color: var(--ink); }
+
+  .summary { display: flex; justify-content: center; gap: 40px; padding: 20px 24px; margin: 0 auto 40px; max-width: 680px; background: var(--warm-white); border: 1px solid var(--border); border-radius: 2px; }
+  .summary-item { text-align: center; }
+  .summary-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500; color: var(--ink); line-height: 1; }
+  .summary-label { font-size: 11px; color: var(--ink-muted); letter-spacing: 0.1em; margin-top: 4px; }
+  .summary-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 0 24px 80px; }
+  .form-card { background: #fff; border: 1px solid var(--border); border-radius: 2px; padding: 32px; margin-bottom: 40px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .form-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold)); }
+  .form-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 24px; letter-spacing: 0.05em; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field.full { grid-column: 1 / -1; }
+  label { font-size: 11px; letter-spacing: 0.15em; color: var(--ink-muted); text-transform: uppercase; }
+  input, select, textarea { background: var(--cream); border: 1px solid var(--border); border-radius: 1px; padding: 11px 14px; font-family: 'Noto Sans TC', sans-serif; font-size: 14px; font-weight: 300; color: var(--ink); outline: none; transition: border-color 0.2s, background 0.2s; width: 100%; }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold); background: #fff; }
+  textarea { resize: vertical; min-height: 60px; }
+  select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a8480' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .btn-add { width: 100%; padding: 13px; background: var(--ink); color: var(--cream); border: none; border-radius: 1px; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; letter-spacing: 0.2em; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+  .btn-add:hover { background: var(--ink-light); }
+  .btn-add:active { transform: scale(0.99); }
+
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-label { font-size: 11px; letter-spacing: 0.15em; color: var(--ink-muted); text-transform: uppercase; margin-right: 4px; }
+  .filter-btn { padding: 6px 16px; border: 1px solid var(--border); background: #fff; border-radius: 50px; font-size: 12px; color: var(--ink-muted); cursor: pointer; transition: all 0.2s; font-family: 'Noto Sans TC', sans-serif; }
+  .filter-btn.active, .filter-btn:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .sort-select { margin-left: auto; padding: 6px 32px 6px 12px; border: 1px solid var(--border); border-radius: 50px; font-size: 12px; background-color: #fff; width: auto; }
+
+  #wishlist { display: flex; flex-direction: column; gap: 12px; }
+  .item-card { background: #fff; border: 1px solid var(--border); border-radius: 2px; padding: 20px 24px; display: grid; grid-template-columns: auto 1fr auto auto; gap: 16px; align-items: center; box-shadow: var(--shadow); transition: box-shadow 0.25s, transform 0.2s; animation: slideIn 0.3s ease; position: relative; }
+  .item-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+  .item-card.done { opacity: 0.5; }
+  .item-card.done .item-name { text-decoration: line-through; color: var(--ink-muted); }
+  @keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .item-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 2px 0 0 2px; }
+  .item-card[data-priority="high"]::before { background: var(--priority-high); }
+  .item-card[data-priority="medium"]::before { background: var(--priority-med); }
+  .item-card[data-priority="low"]::before { background: var(--priority-low); }
+  .item-check { width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; color: transparent; font-size: 10px; }
+  .item-card.done .item-check { background: var(--ink-muted); border-color: var(--ink-muted); color: #fff; }
+  .item-check:hover { border-color: var(--gold); }
+  .item-name { font-size: 15px; font-weight: 400; color: var(--ink); margin-bottom: 4px; }
+  .item-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .item-category { font-size: 11px; color: var(--ink-muted); letter-spacing: 0.05em; }
+  .item-note { font-size: 12px; color: var(--ink-muted); margin-top: 6px; line-height: 1.5; }
+  .priority-tag { font-size: 10px; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 50px; text-transform: uppercase; }
+  .priority-high { background: #fdf0ef; color: var(--priority-high); }
+  .priority-medium { background: #fdf6ea; color: var(--priority-med); }
+  .priority-low { background: #eef5f0; color: var(--priority-low); }
+  .item-price { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--ink); white-space: nowrap; text-align: right; }
+  .item-price-label { font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-align: right; }
+  .item-actions { display: flex; flex-direction: column; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+  .item-card:hover .item-actions { opacity: 1; }
+  .btn-icon { width: 28px; height: 28px; border: 1px solid var(--border); background: #fff; border-radius: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.2s; color: var(--ink-muted); }
+  .btn-icon:hover { border-color: var(--priority-high); color: var(--priority-high); }
+  .btn-icon.edit:hover { border-color: var(--gold); color: var(--gold); }
+
+  .empty { text-align: center; padding: 60px 24px; color: var(--ink-muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.3; }
+  .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: var(--ink-light); margin-bottom: 8px; }
+  .empty-sub { font-size: 13px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,26,23,0.5); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 2px; padding: 32px; max-width: 480px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.97) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+  .btn-save { flex: 1; padding: 12px; background: var(--ink); color: var(--cream); border: none; border-radius: 1px; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; letter-spacing: 0.15em; cursor: pointer; transition: background 0.2s; }
+  .btn-save:hover { background: var(--ink-light); }
+  .btn-cancel { padding: 12px 20px; background: transparent; color: var(--ink-muted); border: 1px solid var(--border); border-radius: 1px; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+  .btn-cancel:hover { border-color: var(--ink-muted); color: var(--ink); }
+
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--cream); padding: 12px 24px; border-radius: 1px; font-size: 13px; letter-spacing: 0.05em; opacity: 0; transition: all 0.3s; z-index: 200; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 520px) {
+    .form-grid, .form-row { grid-template-columns: 1fr; }
+    .item-card { grid-template-columns: auto 1fr auto; }
+    .item-actions { flex-direction: row; opacity: 1; }
+    .summary { gap: 20px; }
+    .login-box { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">✦</div>
+    <div class="login-title">欲購清單</div>
+    <div class="login-sub">輸入你的專屬暗語以載入清單</div>
+    <div class="login-field">
+      <input type="password" id="passphrase-input" placeholder="輸入暗語…" autocomplete="off">
+    </div>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">進入清單</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <header>
+    <div class="header-label">My Wishlist</div>
+    <h1>欲購清單</h1>
+    <p class="header-sub">記錄你想要的一切，讓夢想有個歸所</p>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-dot"></div>
+      <div class="divider-line"></div>
+    </div>
+  </header>
+
+  <div class="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-status">已同步</span>
+    <button class="btn-logout" onclick="doLogout()">登出</button>
+  </div>
+
+  <div class="container">
+    <div class="summary">
+      <div class="summary-item"><div class="summary-num" id="total-items">0</div><div class="summary-label">項目</div></div>
+      <div class="summary-divider"></div>
+      <div class="summary-item"><div class="summary-num" id="total-budget">$0</div><div class="summary-label">預計花費</div></div>
+      <div class="summary-divider"></div>
+      <div class="summary-item"><div class="summary-num" id="high-priority-count">0</div><div class="summary-label">高優先度</div></div>
+      <div class="summary-divider"></div>
+      <div class="summary-item"><div class="summary-num" id="done-count">0</div><div class="summary-label">已購入</div></div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-title">＋ 新增項目</div>
+      <div class="form-grid">
+        <div class="field full"><label>商品名稱</label><input type="text" id="inp-name" placeholder="想要什麼？"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>金額（元）</label><input type="number" id="inp-price" placeholder="0" min="0"></div>
+        <div class="field"><label>優先度</label>
+          <select id="inp-priority">
+            <option value="high">🔴 高</option>
+            <option value="medium" selected>🟡 中</option>
+            <option value="low">🟢 低</option>
+          </select>
+        </div>
+        <div class="field"><label>分類</label>
+          <select id="inp-category">
+            <option value="電子產品">電子產品</option>
+            <option value="服飾配件">服飾配件</option>
+            <option value="居家生活">居家生活</option>
+            <option value="書籍影音">書籍影音</option>
+            <option value="運動休閒">運動休閒</option>
+            <option value="旅遊體驗">旅遊體驗</option>
+            <option value="美食餐飲">美食餐飲</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:20px">
+        <label>備注 <span style="opacity:.5">（選填）</span></label>
+        <textarea id="inp-note" placeholder="連結、尺寸、顏色…"></textarea>
+      </div>
+      <button class="btn-add" onclick="addItem()">加入清單</button>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">篩選</span>
+      <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
+      <button class="filter-btn" onclick="setFilter('high',this)">🔴 高優先</button>
+      <button class="filter-btn" onclick="setFilter('medium',this)">🟡 中優先</button>
+      <button class="filter-btn" onclick="setFilter('low',this)">🟢 低優先</button>
+      <button class="filter-btn" onclick="setFilter('done',this)">✓ 已購入</button>
+      <select class="sort-select" onchange="setSort(this.value)">
+        <option value="date">最新加入</option>
+        <option value="price-desc">金額由高到低</option>
+        <option value="price-asc">金額由低到高</option>
+        <option value="priority">優先度</option>
+      </select>
+    </div>
+
+    <div id="wishlist"></div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">編輯項目</div>
+    <input type="hidden" id="edit-id">
+    <div class="form-grid">
+      <div class="field full"><label>商品名稱</label><input type="text" id="edit-name"></div>
+    </div>
+    <div class="form-row" style="margin-bottom:16px">
+      <div class="field"><label>金額（元）</label><input type="number" id="edit-price" min="0"></div>
+      <div class="field"><label>優先度</label>
+        <select id="edit-priority">
+          <option value="high">🔴 高</option>
+          <option value="medium">🟡 中</option>
+          <option value="low">🟢 低</option>
+        </select>
+      </div>
+      <div class="field"><label>分類</label>
+        <select id="edit-category">
+          <option value="電子產品">電子產品</option>
+          <option value="服飾配件">服飾配件</option>
+          <option value="居家生活">居家生活</option>
+          <option value="書籍影音">書籍影音</option>
+          <option value="運動休閒">運動休閒</option>
+          <option value="旅遊體驗">旅遊體驗</option>
+          <option value="美食餐飲">美食餐飲</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>備注</label><textarea id="edit-note"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-save" onclick="saveEdit()">儲存變更</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── JSONBin config ──
+  const JSONBIN_API_KEY = '$2a$10$pmslvTF.eMnpbQlbqGkfeedhsKX9WIE0jC8FRCSVR5w2k7oGBJ0Bm';
+  const JSONBIN_BASE    = 'https://api.jsonbin.io/v3';
+
+  // Passphrase → bin ID mapping (stored in localStorage as index)
+  // Each passphrase gets its own bin on first login
+  function getBinMapKey() { return 'wishlist_binmap'; }
+  function getBinMap() {
+    try { return JSON.parse(localStorage.getItem(getBinMapKey()) || '{}'); } catch(e) { return {}; }
+  }
+  function setBinMap(map) { localStorage.setItem(getBinMapKey(), JSON.stringify(map)); }
+
+  let binId    = null;
+  let items    = [];
+  let passKey  = null;
+  let currentFilter = 'all';
+  let currentSort   = 'date';
+  let syncTimer = null;
+
+  const priorityOrder = { high:0, medium:1, low:2 };
+  const priorityLabel = { high:'高', medium:'中', low:'低' };
+
+  // ── Sync UI ──
+  function setSyncStatus(state, msg) {
+    const dot = document.getElementById('sync-dot');
+    dot.className = 'sync-dot' + (state==='syncing'?' syncing':state==='error'?' error':'');
+    document.getElementById('sync-status').textContent = msg;
+  }
+
+  // ── JSONBin API helpers ──
+  async function apiFetch(path, method='GET', body=null) {
+    const opts = {
+      method,
+      headers: {
+        'X-Master-Key': JSONBIN_API_KEY,
+        'Content-Type': 'application/json',
+        'X-Bin-Versioning': 'false'
+      }
+    };
+    if (body !== null) opts.body = JSON.stringify(body);
+    const res = await fetch(JSONBIN_BASE + path, opts);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function createBin(initialData) {
+    const res = await apiFetch('/b', 'POST', initialData);
+    return res.metadata.id;
+  }
+
+  async function readBin(id) {
+    const res = await apiFetch('/b/' + id + '/latest');
+    return res.record;
+  }
+
+  async function updateBin(id, data) {
+    await apiFetch('/b/' + id, 'PUT', data);
+  }
+
+  // ── Login ──
+  async function doLogin() {
+    const pass = document.getElementById('passphrase-input').value.trim();
+    if (!pass) { document.getElementById('login-error').textContent = '請輸入暗語'; return; }
+
+    passKey = pass.toLowerCase().replace(/\s+/g, '-');
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true;
+    btn.textContent = '載入中…';
+    document.getElementById('login-error').textContent = '';
+
+    try {
+      const map = getBinMap();
+
+      if (map[passKey]) {
+        // Existing bin → load
+        binId = map[passKey];
+        const data = await readBin(binId);
+        items = Array.isArray(data.items) ? data.items : [];
+      } else {
+        // New passphrase → create bin
+        const initData = { passKey, items: [] };
+        binId = await createBin(initData);
+        map[passKey] = binId;
+        setBinMap(map);
+        items = [];
+      }
+
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'block';
+      setSyncStatus('ok', '已同步');
+      render();
+      updateSummary();
+    } catch(e) {
+      document.getElementById('login-error').textContent = '連線失敗，請檢查網路後再試';
+      binId = null; passKey = null;
+    }
+
+    btn.disabled = false;
+    btn.textContent = '進入清單';
+  }
+
+  function doLogout() {
+    binId = null; passKey = null; items = [];
+    document.getElementById('passphrase-input').value = '';
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // ── Save to cloud (debounced) ──
+  async function pushToCloud() {
+    if (!binId) return;
+    setSyncStatus('syncing', '同步中…');
+    try {
+      await updateBin(binId, { passKey, items });
+      setSyncStatus('ok', '已同步 ✓');
+    } catch(e) {
+      setSyncStatus('error', '同步失敗，請稍後再試');
+    }
+  }
+
+  function scheduleSave() {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(pushToCloud, 900);
+  }
+
+  // ── Data ops ──
+  function save() { scheduleSave(); render(); updateSummary(); }
+
+  function addItem() {
+    const name = document.getElementById('inp-name').value.trim();
+    const price = parseFloat(document.getElementById('inp-price').value) || 0;
+    const priority = document.getElementById('inp-priority').value;
+    const category = document.getElementById('inp-category').value;
+    const note = document.getElementById('inp-note').value.trim();
+    if (!name) { showToast('請輸入商品名稱'); return; }
+    items.unshift({ id: Date.now(), name, price, priority, category, note, done: false });
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-price').value = '';
+    document.getElementById('inp-note').value = '';
+    document.getElementById('inp-priority').value = 'medium';
+    save();
+    showToast('已加入清單 ✓');
+  }
+
+  function deleteItem(id) { items = items.filter(i => i.id !== id); save(); showToast('已刪除'); }
+
+  function toggleDone(id) {
+    const item = items.find(i => i.id === id);
+    if (item) { item.done = !item.done; save(); }
+  }
+
+  function openEdit(id) {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-name').value = item.name;
+    document.getElementById('edit-price').value = item.price;
+    document.getElementById('edit-priority').value = item.priority;
+    document.getElementById('edit-category').value = item.category;
+    document.getElementById('edit-note').value = item.note;
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+  function saveEdit() {
+    const id = parseInt(document.getElementById('edit-id').value);
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    item.name     = document.getElementById('edit-name').value.trim();
+    item.price    = parseFloat(document.getElementById('edit-price').value) || 0;
+    item.priority = document.getElementById('edit-priority').value;
+    item.category = document.getElementById('edit-category').value;
+    item.note     = document.getElementById('edit-note').value.trim();
+    closeModal(); save(); showToast('已儲存更新 ✓');
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function setSort(s) { currentSort = s; render(); }
+
+  function getFiltered() {
+    let list = [...items];
+    if (currentFilter === 'done') list = list.filter(i => i.done);
+    else if (currentFilter !== 'all') list = list.filter(i => i.priority === currentFilter && !i.done);
+    if (currentSort === 'price-desc') list.sort((a,b) => b.price - a.price);
+    else if (currentSort === 'price-asc') list.sort((a,b) => a.price - b.price);
+    else if (currentSort === 'priority') list.sort((a,b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    return list;
+  }
+
+  function formatPrice(n) { return n === 0 ? '—' : '$' + n.toLocaleString(); }
+
+  function render() {
+    const list = getFiltered();
+    const container = document.getElementById('wishlist');
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">清單是空的</div><p class="empty-sub">加入你第一個心願吧</p></div>`;
+      return;
+    }
+    container.innerHTML = list.map(item => `
+      <div class="item-card ${item.done?'done':''}" data-priority="${item.priority}">
+        <div class="item-check" onclick="toggleDone(${item.id})">${item.done?'✓':''}</div>
+        <div class="item-body">
+          <div class="item-name">${escHtml(item.name)}</div>
+          <div class="item-meta">
+            <span class="item-category">${escHtml(item.category)}</span>
+            <span class="priority-tag priority-${item.priority}">${priorityLabel[item.priority]}</span>
+          </div>
+          ${item.note?`<div class="item-note">${escHtml(item.note)}</div>`:''}
+        </div>
+        <div>
+          <div class="item-price">${formatPrice(item.price)}</div>
+          ${item.price?'<div class="item-price-label">預算</div>':''}
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon edit" onclick="openEdit(${item.id})" title="編輯">✎</button>
+          <button class="btn-icon" onclick="deleteItem(${item.id})" title="刪除">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function updateSummary() {
+    const active = items.filter(i => !i.done);
+    const done   = items.filter(i => i.done);
+    const total  = active.reduce((s,i) => s+i.price, 0);
+    const high   = active.filter(i => i.priority==='high').length;
+    document.getElementById('total-items').textContent = items.length;
+    document.getElementById('total-budget').textContent = total>0 ? '$'+total.toLocaleString() : '$0';
+    document.getElementById('high-priority-count').textContent = high;
+    document.getElementById('done-count').textContent = done.length;
+  }
+
+  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  document.getElementById('modal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key==='Escape') closeModal();
+    if (e.key==='Enter' && e.target.id==='inp-name') addItem();
+    if (e.key==='Enter' && e.target.id==='passphrase-input') doLogin();
+  });
+</script>
+</body>
+</html>
